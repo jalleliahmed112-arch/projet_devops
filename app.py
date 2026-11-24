@@ -1,6 +1,7 @@
 """Petite application web pour suivre les incidents informatiques."""
 
 import os
+from contextlib import contextmanager
 
 import psycopg2
 from flask import Flask, abort, redirect, render_template_string, request, url_for
@@ -80,9 +81,20 @@ def get_connection():
     return psycopg2.connect(**DB_CONFIG)
 
 
+@contextmanager
+def database_connection():
+    """Valide la transaction puis ferme toujours la connexion PostgreSQL."""
+    connection = get_connection()
+    try:
+        with connection:
+            yield connection
+    finally:
+        connection.close()
+
+
 def initialize_database():
     """Crée la table au premier démarrage de l'application."""
-    with get_connection() as connection:
+    with database_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
                 """CREATE TABLE IF NOT EXISTS incidents (
@@ -98,7 +110,7 @@ def initialize_database():
 
 def list_incidents():
     """Retourne les incidents du plus récent au plus ancien."""
-    with get_connection() as connection:
+    with database_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT id, title, description, location, priority, status "
@@ -111,7 +123,7 @@ def list_incidents():
 
 def find_incident(incident_id):
     """Recherche un incident à partir de son numéro."""
-    with get_connection() as connection:
+    with database_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT id, title, description, location, priority, status "
@@ -147,7 +159,7 @@ def create_incident():
         abort(400, "Le titre, la description et le lieu sont obligatoires.")
     if priority not in ("Faible", "Moyenne", "Élevée"):
         abort(400, "La priorité est invalide.")
-    with get_connection() as connection:
+    with database_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
                 "INSERT INTO incidents (title, description, location, priority) "
@@ -172,7 +184,7 @@ def update_status(incident_id):
     status = request.form.get("status", "")
     if status not in ("Nouveau", "En cours", "Résolu"):
         abort(400, "Le statut est invalide.")
-    with get_connection() as connection:
+    with database_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
                 "UPDATE incidents SET status = %s WHERE id = %s",

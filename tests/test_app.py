@@ -52,6 +52,9 @@ def test_create_incident_saves_form(monkeypatch):
         def __exit__(self, *args):
             return False
 
+        def close(self):
+            pass
+
     monkeypatch.setattr("app.get_connection", lambda: FakeConnection())
     response = app.test_client().post(
         "/incidents",
