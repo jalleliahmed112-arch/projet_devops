@@ -1,6 +1,6 @@
 services:
   web:
-    image: ghcr.io/REMPLACER_PAR_VOTRE_COMPTE/gestion-incidents:latest
+    image: ghcr.io/jalleliahmed112-arch/projet_devops:latest
     ports:
       - "5000:5000"
     environment:
