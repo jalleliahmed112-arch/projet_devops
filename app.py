@@ -21,57 +21,75 @@ PAGE = """
 <html lang="fr">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Gestion des incidents</title>
-  <style>
-    body { max-width: 900px; margin: 2rem auto; padding: 0 1rem; font-family: Arial, sans-serif; }
-    input, textarea, select, button { margin: .3rem 0; padding: .5rem; }
-    input, textarea { width: min(100%, 34rem); }
-    li { margin: .8rem 0; }
-    .bloc { padding: 1rem; border: 1px solid #bbb; border-radius: 8px; margin: 1rem 0; }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-  <h1>Gestion des incidents informatiques</h1>
-  <section class="bloc">
+<body class="page">
+  <main class="container">
+  <header class="hero">
+    <p class="eyebrow">Espace de support informatique</p>
+    <h1>Gestion des incidents</h1>
+    <p class="hero-text">Signalez un problème et suivez son traitement.</p>
+  </header>
+  <section class="panel form-panel">
     <h2>Signaler un incident</h2>
-    <form method="post" action="{{ url_for('create_incident') }}">
-      <label>Titre<br><input name="title" required maxlength="150"></label><br>
-      <label>Description<br><textarea name="description" required rows="3"></textarea></label><br>
-      <label>Salle ou laboratoire<br><input name="location" required maxlength="100"></label><br>
-      <label>Priorité<br><select name="priority"><option>Faible</option><option selected>Moyenne</option><option>Élevée</option></select></label><br>
-      <button type="submit">Ajouter l’incident</button>
+    <form class="incident-form" method="post" action="{{ url_for('create_incident') }}">
+      <label class="field">Titre<input name="title" required maxlength="150" placeholder="Ex. Ordinateur en panne"></label>
+      <label class="field">Description<textarea name="description" required rows="3" placeholder="Décrivez le problème rencontré"></textarea></label>
+      <div class="form-row">
+        <label class="field">Salle ou laboratoire<input name="location" required maxlength="100" placeholder="Ex. Salle B12"></label>
+        <label class="field">Priorité<select name="priority"><option>Faible</option><option selected>Moyenne</option><option>Élevée</option></select></label>
+      </div>
+      <button class="button" type="submit">Ajouter l’incident</button>
     </form>
   </section>
-  <h2>Incidents déclarés</h2>
+  <section class="incidents-section">
+  <div class="section-heading"><div><p class="eyebrow">Suivi</p><h2>Incidents déclarés</h2></div></div>
   {% if incidents %}
-  <ul>
+  <ul class="incident-list">
     {% for incident in incidents %}
-    <li><a href="{{ url_for('incident_detail', incident_id=incident['id']) }}">#{{ incident['id'] }} — {{ incident['title'] }}</a>
-      | {{ incident['location'] }} | priorité {{ incident['priority'] }} | {{ incident['status'] }}</li>
+    <li class="incident-card">
+      <div class="incident-card-top"><span class="incident-number">Incident #{{ incident['id'] }}</span><span class="badge">{{ incident['status'] }}</span></div>
+      <h3><a href="{{ url_for('incident_detail', incident_id=incident['id']) }}">{{ incident['title'] }}</a></h3>
+      <p class="incident-meta">{{ incident['location'] }} <span aria-hidden="true">·</span> Priorité {{ incident['priority'] }}</p>
+    </li>
     {% endfor %}
   </ul>
-  {% else %}<p>Aucun incident pour le moment.</p>{% endif %}
+  {% else %}<div class="empty-state"><span class="empty-icon" aria-hidden="true">✓</span><p>Aucun incident pour le moment.</p><small>Les nouveaux signalements apparaîtront ici.</small></div>{% endif %}
+  </section>
+  </main>
 </body>
 </html>
 """
 
 DETAIL_PAGE = """
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Incident #{{ incident['id'] }}</title></head>
-<body style="font-family:Arial,sans-serif;max-width:700px;margin:2rem auto">
-  <p><a href="{{ url_for('home') }}">← Retour à la liste</a></p>
-  <h1>Incident #{{ incident['id'] }} : {{ incident['title'] }}</h1>
-  <p><strong>Description :</strong> {{ incident['description'] }}</p>
-  <p><strong>Lieu :</strong> {{ incident['location'] }}</p>
-  <p><strong>Priorité :</strong> {{ incident['priority'] }}</p>
-  <p><strong>Statut :</strong> {{ incident['status'] }}</p>
-  <form method="post" action="{{ url_for('update_status', incident_id=incident['id']) }}">
-    <label>Nouveau statut
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Incident #{{ incident['id'] }}</title><link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head>
+<body class="page">
+  <main class="container detail-container">
+  <p class="back-link"><a href="{{ url_for('home') }}">← Retour à la liste</a></p>
+  <section class="panel detail-panel">
+  <p class="eyebrow">Fiche de suivi · Incident #{{ incident['id'] }}</p>
+  <h1>{{ incident['title'] }}</h1>
+  <div class="detail-grid">
+    <p><strong>Description</strong><span>{{ incident['description'] }}</span></p>
+    <p><strong>Lieu</strong><span>{{ incident['location'] }}</span></p>
+    <p><strong>Priorité</strong><span>{{ incident['priority'] }}</span></p>
+    <p><strong>Statut actuel</strong><span class="badge">{{ incident['status'] }}</span></p>
+  </div>
+  </section>
+  <section class="panel actions-panel">
+    <h2>Mettre à jour le suivi</h2>
+  <form class="action-form" method="post" action="{{ url_for('update_status', incident_id=incident['id']) }}">
+    <label class="field">Nouveau statut
       <select name="status"><option>Nouveau</option><option>En cours</option><option>Résolu</option></select>
-    </label><button type="submit">Modifier le statut</button>
+    </label><button class="button" type="submit">Modifier le statut</button>
   </form>
-  <form method="post" action="{{ url_for('delete_incident', incident_id=incident['id']) }}">
-    <button type="submit">Supprimer l’incident</button>
+  <form class="delete-form" method="post" action="{{ url_for('delete_incident', incident_id=incident['id']) }}">
+    <button class="button button-danger" type="submit">Supprimer l’incident</button>
   </form>
+  </section>
+  </main>
 </body></html>
 """
 
