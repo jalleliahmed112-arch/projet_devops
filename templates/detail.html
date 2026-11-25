@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Incident #{{ incident['id'] }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="page">
+  <main class="container detail-container">
+    <p class="back-link"><a href="{{ url_for('home') }}">← Retour à la liste</a></p>
+    <section class="panel detail-panel">
+      <p class="eyebrow">Fiche de suivi · Incident #{{ incident['id'] }}</p>
+      <h1>{{ incident['title'] }}</h1>
+      <div class="detail-grid">
+        <p><strong>Description</strong><span>{{ incident['description'] }}</span></p>
+        <p><strong>Lieu</strong><span>{{ incident['location'] }}</span></p>
+        <p><strong>Priorité</strong><span>{{ incident['priority'] }}</span></p>
+        <p><strong>Statut actuel</strong><span class="badge">{{ incident['status'] }}</span></p>
+      </div>
+    </section>
+
+    <section class="panel actions-panel">
+      <h2>Mettre à jour le suivi</h2>
+      <form class="action-form" method="post" action="{{ url_for('update_status', incident_id=incident['id']) }}">
+        <label class="field">Nouveau statut
+          <select name="status"><option>Nouveau</option><option>En cours</option><option>Résolu</option></select>
+        </label>
+        <button class="button" type="submit">Modifier le statut</button>
+      </form>
+      <form class="delete-form" method="post" action="{{ url_for('delete_incident', incident_id=incident['id']) }}">
+        <button class="button button-danger" type="submit">Supprimer l’incident</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

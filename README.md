@@ -15,6 +15,14 @@ Application web simple pour déclarer et suivre les incidents informatiques d'un
 
 Les versions et commandes Docker, Compose, Flask, PostgreSQL, GitHub Actions et GHCR reprennent les ateliers 2 à 5.
 
+## Organisation des pages
+
+- `templates/index.html` contient la page d'accueil et le formulaire de déclaration.
+- `templates/detail.html` contient la fiche de suivi d'un incident.
+- `static/style.css` contient les couleurs, les espacements et l'affichage adapté aux petits écrans.
+
+Flask charge les pages HTML depuis `templates/` et sert la feuille de style depuis `static/`.
+
 ## Lancer l'application en local
 
 1. Installer et démarrer Docker Desktop.
